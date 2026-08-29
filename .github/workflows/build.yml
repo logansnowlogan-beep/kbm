@@ -4,7 +4,7 @@ name: Build my_keyboard
   workflow_dispatch:
   push:
     paths:
-      - "keyboards/handwired/my_keyboard/**"
+      - "my_keyboard/**"
       - ".github/workflows/build.yml"
 
 jobs:
@@ -70,23 +70,26 @@ jobs:
         run: |
           set -euxo pipefail
 
+          CONFIG="vial-qmk/keyboards/handwired/my_keyboard/keymaps/vial/config.h"
+
           echo "=== Vial config.h ==="
-          cat "vial-qmk/keyboards/handwired/my_keyboard/keymaps/vial/config.h"
+          cat "$CONFIG"
 
-          echo "=== Checking Vial unlock definitions ==="
-          grep -n "VIAL_UNLOCK_COMBO" \
-            "vial-qmk/keyboards/handwired/my_keyboard/keymaps/vial/config.h"
+          echo "=== Checking VIAL_KEYBOARD_UID ==="
+          grep -n "VIAL_KEYBOARD_UID" "$CONFIG"
 
-          test -f \
-            "vial-qmk/keyboards/handwired/my_keyboard/keymaps/vial/config.h"
+          echo "=== Checking VIAL_UNLOCK_COMBO_ROWS ==="
+          grep -n "VIAL_UNLOCK_COMBO_ROWS" "$CONFIG"
 
-          grep -q "VIAL_UNLOCK_COMBO_ROWS" \
-            "vial-qmk/keyboards/handwired/my_keyboard/keymaps/vial/config.h"
+          echo "=== Checking VIAL_UNLOCK_COMBO_COLS ==="
+          grep -n "VIAL_UNLOCK_COMBO_COLS" "$CONFIG"
 
-          grep -q "VIAL_UNLOCK_COMBO_COLS" \
-            "vial-qmk/keyboards/handwired/my_keyboard/keymaps/vial/config.h"
+          test -f "$CONFIG"
+          grep -q "VIAL_KEYBOARD_UID" "$CONFIG"
+          grep -q "VIAL_UNLOCK_COMBO_ROWS" "$CONFIG"
+          grep -q "VIAL_UNLOCK_COMBO_COLS" "$CONFIG"
 
-          echo "Vial unlock configuration found."
+          echo "Vial config is present and contains all required definitions."
       - name: Verify keyboard files
         shell: bash
         run: |
