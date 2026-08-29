@@ -1,0 +1,8 @@
+# RP2040 bootloader
+BOOTLOADER = rp2040
+
+# RP2040 board target
+BOARD = GENERIC_RP_RP2040
+
+LTO_ENABLE = yes
+NKRO_ENABLE = yes
