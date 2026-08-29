@@ -36,44 +36,21 @@ jobs:
         run: |
           set -euxo pipefail
 
-          echo "=== Current directory ==="
-          pwd
+          echo "=== Checking my_keyboard ==="
+          test -d "my_keyboard"
 
-          echo "=== Repository contents ==="
-          ls -lah
+          echo "=== Keyboard files in repository ==="
+          find "my_keyboard" -type f -print
 
-          echo "=== Checking keyboard directory ==="
-          if [ ! -d "keyboards/handwired/my_keyboard" ]; then
-            echo "ERROR: keyboards/handwired/my_keyboard does not exist!"
-            echo "Available keyboard directories:"
-            find keyboards -maxdepth 4 -type d 2>/dev/null || true
-            exit 1
-          fi
-
-          echo "Keyboard directory found."
-
-          echo "=== Keyboard files ==="
-          find "keyboards/handwired/my_keyboard" -type f -print
-
-          echo "=== Checking Vial-QMK ==="
-          if [ ! -d "vial-qmk" ]; then
-            echo "ERROR: vial-qmk directory does not exist!"
-            exit 1
-          fi
-
-          echo "Vial-QMK directory found."
-
-          echo "=== Creating destination ==="
+          echo "=== Creating Vial-QMK destination ==="
           mkdir -p "vial-qmk/keyboards/handwired/my_keyboard"
 
           echo "=== Copying keyboard ==="
-          rsync -av \
-            "keyboards/handwired/my_keyboard/" \
+          rsync -av --delete \
+            "my_keyboard/" \
             "vial-qmk/keyboards/handwired/my_keyboard/"
 
-          echo "=== Copy completed ==="
-
-          echo "=== Files inside Vial-QMK ==="
+          echo "=== Files copied into Vial-QMK ==="
           find "vial-qmk/keyboards/handwired/my_keyboard" -type f -print
 
       - name: Verify keyboard files
