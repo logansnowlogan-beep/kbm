@@ -1,11 +1,11 @@
 name: Build my_keyboard
 
 "on":
-push:
-paths:
-- 'keyboards/handwired/my_keyboard/**'
-- '.github/workflows/build.yml'
-workflow_dispatch:
+  push:
+    paths:
+      - 'keyboards/handwired/my_keyboard/**'
+      - '.github/workflows/build.yml'
+  workflow_dispatch:
 
 jobs:
 build:
