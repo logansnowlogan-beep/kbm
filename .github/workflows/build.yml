@@ -34,10 +34,47 @@ jobs:
       - name: Copy keyboard into Vial QMK
         shell: bash
         run: |
-          set -e
-          test -d "keyboards/handwired/my_keyboard"
+          set -euxo pipefail
+
+          echo "=== Current directory ==="
+          pwd
+
+          echo "=== Repository contents ==="
+          ls -lah
+
+          echo "=== Checking keyboard directory ==="
+          if [ ! -d "keyboards/handwired/my_keyboard" ]; then
+            echo "ERROR: keyboards/handwired/my_keyboard does not exist!"
+            echo "Available keyboard directories:"
+            find keyboards -maxdepth 4 -type d 2>/dev/null || true
+            exit 1
+          fi
+
+          echo "Keyboard directory found."
+
+          echo "=== Keyboard files ==="
+          find "keyboards/handwired/my_keyboard" -type f -print
+
+          echo "=== Checking Vial-QMK ==="
+          if [ ! -d "vial-qmk" ]; then
+            echo "ERROR: vial-qmk directory does not exist!"
+            exit 1
+          fi
+
+          echo "Vial-QMK directory found."
+
+          echo "=== Creating destination ==="
           mkdir -p "vial-qmk/keyboards/handwired/my_keyboard"
-          rsync -a --delete             "keyboards/handwired/my_keyboard/"             "vial-qmk/keyboards/handwired/my_keyboard/"
+
+          echo "=== Copying keyboard ==="
+          rsync -av \
+            "keyboards/handwired/my_keyboard/" \
+            "vial-qmk/keyboards/handwired/my_keyboard/"
+
+          echo "=== Copy completed ==="
+
+          echo "=== Files inside Vial-QMK ==="
+          find "vial-qmk/keyboards/handwired/my_keyboard" -type f -print
 
       - name: Verify keyboard files
         shell: bash
