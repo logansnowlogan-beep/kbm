@@ -46,8 +46,7 @@ jobs:
 
       - name: Build firmware
         working-directory: vial-qmk
-        run: 
-          qmk compile -kb handwired/my_keyboard -km vial
+        run: make handwired/my_keyboard:vial V=1
 
       - name: Collect firmware
         run: |
@@ -61,3 +60,4 @@ jobs:
         with:
           name: my_keyboard_vial_firmware
           path: artifacts/
+
