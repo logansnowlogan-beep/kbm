@@ -1,63 +1,84 @@
 name: Build my_keyboard
 
 "on":
-  push:
-    paths:
-      - 'keyboards/handwired/my_keyboard/**'
-      - '.github/workflows/build.yml'
-  workflow_dispatch:
+push:
+paths:
+- 'keyboards/handwired/my_keyboard/**'
+- '.github/workflows/build.yml'
+workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+build:
+runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout keyboard repository
-        uses: actions/checkout@v4
+steps:
+  - name: Checkout keyboard repository
+    uses: actions/checkout@v4
 
-      - name: Checkout Vial QMK
-        uses: actions/checkout@v4
-        with:
-          repository: vial-kb/vial-qmk
-          ref: vial
-          submodules: recursive
-          path: vial-qmk
+  - name: Checkout Vial QMK
+    uses: actions/checkout@v4
+    with:
+      repository: vial-kb/vial-qmk
+      ref: vial
+      submodules: recursive
+      path: vial-qmk
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3 python3-pip git make rsync
+  - name: Install dependencies
+    run: |
+      sudo apt-get update
+      sudo apt-get install -y python3 python3-pip git make rsync
 
-      - name: Copy keyboard
-        run: |
-          test -d keyboards/handwired/my_keyboard
-          mkdir -p vial-qmk/keyboards/handwired/my_keyboard
-          rsync -av --delete keyboards/handwired/my_keyboard/ vial-qmk/keyboards/handwired/my_keyboard/
+  - name: Install QMK CLI
+    run: |
+      python3 -m pip install --user qmk
+      echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      export PATH="$HOME/.local/bin:$PATH"
+      qmk --version
 
-      - name: Check keyboard.json
-        run: |
-          test -f vial-qmk/keyboards/handwired/my_keyboard/keyboard.json
-          python3 -m json.tool vial-qmk/keyboards/handwired/my_keyboard/keyboard.json > /dev/null
-          echo "keyboard.json is valid."
+  - name: Configure QMK
+    working-directory: vial-qmk
+    run: |
+      export PATH="$HOME/.local/bin:$PATH"
+      qmk setup -H "$GITHUB_WORKSPACE/vial-qmk" -y
 
-      - name: Show keyboard files
-        run: |
-          find vial-qmk/keyboards/handwired/my_keyboard -type f -print
+  - name: Copy keyboard
+    run: |
+      test -d keyboards/handwired/my_keyboard
+      mkdir -p vial-qmk/keyboards/handwired/my_keyboard
+      rsync -av --delete keyboards/handwired/my_keyboard/ vial-qmk/keyboards/handwired/my_keyboard/
 
-      - name: Build firmware
-        working-directory: vial-qmk
-        run: make handwired/my_keyboard:vial V=1
+  - name: Check keyboard.json
+    run: |
+      test -f vial-qmk/keyboards/handwired/my_keyboard/keyboard.json
+      python3 -m json.tool vial-qmk/keyboards/handwired/my_keyboard/keyboard.json > /dev/null
+      echo "keyboard.json is valid."
 
-      - name: Collect firmware
-        run: |
-          mkdir -p artifacts
-          find vial-qmk/.build -type f \( -name '*.uf2' -o -name '*.bin' -o -name '*.hex' \) -exec cp {} artifacts/ \;
-          ls -lah artifacts
-          test -n "$(ls -A artifacts)"
+  - name: Show keyboard files
+    run: |
+      find vial-qmk/keyboards/handwired/my_keyboard -type f -print
 
-      - name: Upload firmware
-        uses: actions/upload-artifact@v4
-        with:
-          name: my_keyboard_vial_firmware
-          path: artifacts/
+  - name: Check QMK
+    working-directory: vial-qmk
+    run: |
+      export PATH="$HOME/.local/bin:$PATH"
+      qmk hello
+
+  - name: Build firmware
+    working-directory: vial-qmk
+    run: |
+      export PATH="$HOME/.local/bin:$PATH"
+      qmk compile -kb handwired/my_keyboard -km vial
+
+  - name: Collect firmware
+    run: |
+      mkdir -p artifacts
+      find vial-qmk/.build -type f \( -name '*.uf2' -o -name '*.bin' -o -name '*.hex' \) -exec cp {} artifacts/ \;
+      ls -lah artifacts
+      test -n "$(ls -A artifacts)"
+
+  - name: Upload firmware
+    uses: actions/upload-artifact@v4
+    with:
+      name: my_keyboard_vial_firmware
+      path: artifacts/
 
