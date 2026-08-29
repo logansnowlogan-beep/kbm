@@ -30,7 +30,20 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           export PATH="$HOME/.local/bin:$PATH"
           qmk --version
-
+      - name: Install build dependencies
+        shell: bash
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y \
+            python3 \
+            python3-pip \
+            git \
+            make \
+            rsync \
+            gcc-arm-none-eabi \
+            binutils-arm-none-eabi \
+            libnewlib-arm-none-eabi
       - name: Copy keyboard into Vial QMK
         shell: bash
         run: |
