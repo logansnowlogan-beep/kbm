@@ -46,7 +46,8 @@ jobs:
 
       - name: Build firmware
         working-directory: vial-qmk
-        run: make handwired/my_keyboard:vial V=1
+        run: 
+          qmk compile -kb handwired/my_keyboard -km vial
 
       - name: Collect firmware
         run: |
