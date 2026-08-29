@@ -3,15 +3,14 @@ name: Build my_keyboard
 on:
 push:
 paths:
-- "keyboards/handwired/my_keyboard/**"
-- ".github/workflows/build.yml"
+- 'keyboards/handwired/my_keyboard/**'
+- '.github/workflows/build.yml'
 workflow_dispatch:
 
 jobs:
 build:
 runs-on: ubuntu-latest
 
-```
 steps:
   - name: Checkout keyboard repository
     uses: actions/checkout@v4
@@ -34,57 +33,35 @@ steps:
       python3 -m pip install --user qmk
       echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
-  - name: Copy keyboard definition
+  - name: Copy keyboard
     run: |
-      test -d keyboards/handwired/my_keyboard || (
-        echo "ERROR: keyboards/handwired/my_keyboard/ not found."
-        exit 1
-      )
-
+      test -d keyboards/handwired/my_keyboard
       mkdir -p vial-qmk/keyboards/handwired/my_keyboard
+      rsync -av --delete keyboards/handwired/my_keyboard/ vial-qmk/keyboards/handwired/my_keyboard/
 
-      rsync -av --delete \
-        keyboards/handwired/my_keyboard/ \
-        vial-qmk/keyboards/handwired/my_keyboard/
-
-  - name: Verify keyboard files
+  - name: Check keyboard.json
     run: |
-      echo "Keyboard files:"
+      test -f vial-qmk/keyboards/handwired/my_keyboard/keyboard.json
+      python3 -m json.tool vial-qmk/keyboards/handwired/my_keyboard/keyboard.json > /dev/null
+      echo "keyboard.json is valid."
+
+  - name: Show keyboard files
+    run: |
       find vial-qmk/keyboards/handwired/my_keyboard -type f -print
 
-      echo
-      echo "Checking keyboard.json:"
-      test -f vial-qmk/keyboards/handwired/my_keyboard/keyboard.json
-
-      python3 -m json.tool \
-        vial-qmk/keyboards/handwired/my_keyboard/keyboard.json \
-        > /dev/null
-
-      echo "keyboard.json is valid JSON."
-
-  - name: Compile firmware
-    run: |
-      cd vial-qmk
-      make handwired/my_keyboard:vial V=1
+  - name: Build firmware
+    working-directory: vial-qmk
+    run: make handwired/my_keyboard:vial V=1
 
   - name: Collect firmware
     run: |
       mkdir -p artifacts
-
-      find vial-qmk/.build -type f \
-        \( -name "*.uf2" -o -name "*.bin" -o -name "*.hex" \) \
-        -exec cp {} artifacts/ \;
-
-      echo "Firmware files:"
+      find vial-qmk/.build -type f \( -name '*.uf2' -o -name '*.bin' -o -name '*.hex' \) -exec cp {} artifacts/ \;
       ls -lah artifacts
-
-      test -n "$(ls -A artifacts)" || (
-        echo "ERROR: No firmware found."
-        exit 1
-      )
+      test -n "$(ls -A artifacts)"
 
   - name: Upload firmware
     uses: actions/upload-artifact@v4
     with:
       name: my_keyboard_vial_firmware
-      path: artifacts
+      path: artifacts/
