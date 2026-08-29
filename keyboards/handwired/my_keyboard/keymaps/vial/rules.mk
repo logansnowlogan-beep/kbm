@@ -8,14 +8,9 @@
 # Reference: https://get.vial.today/docs/porting-to-vial.html
 #
 VIAL_ENABLE = yes
+ENCODER_ENABLE = yes
 
-# ── DEBOUNCE ALGORITHM (#27) ──────────────────────────────────────
-# sym_defer_g: global timer, safe for all switches (QMK default)
-# sym_defer_pr: per-row/key timer
-# sym_eager_pr: register immediately on press
-# asym_eager_defer_pk: press eager, release deferred (per key)
 DEBOUNCE_TYPE = sym_defer_g
-
 
 
 
