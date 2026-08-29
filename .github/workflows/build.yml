@@ -65,7 +65,28 @@ jobs:
 
           echo "=== Files copied into Vial-QMK ==="
           find "vial-qmk/keyboards/handwired/my_keyboard" -type f -print
+      - name: Verify Vial config
+        shell: bash
+        run: |
+          set -euxo pipefail
 
+          echo "=== Vial config.h ==="
+          cat "vial-qmk/keyboards/handwired/my_keyboard/keymaps/vial/config.h"
+
+          echo "=== Checking Vial unlock definitions ==="
+          grep -n "VIAL_UNLOCK_COMBO" \
+            "vial-qmk/keyboards/handwired/my_keyboard/keymaps/vial/config.h"
+
+          test -f \
+            "vial-qmk/keyboards/handwired/my_keyboard/keymaps/vial/config.h"
+
+          grep -q "VIAL_UNLOCK_COMBO_ROWS" \
+            "vial-qmk/keyboards/handwired/my_keyboard/keymaps/vial/config.h"
+
+          grep -q "VIAL_UNLOCK_COMBO_COLS" \
+            "vial-qmk/keyboards/handwired/my_keyboard/keymaps/vial/config.h"
+
+          echo "Vial unlock configuration found."
       - name: Verify keyboard files
         shell: bash
         run: |
