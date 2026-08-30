@@ -40,7 +40,7 @@
       },
       {
         "pin_a": "GP16",
-        "pin_b": "GP22",
+        "pin_b": "GP20",
         "resolution": 4
       }
     ]
